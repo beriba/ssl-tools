@@ -1,0 +1,13 @@
+#!/bin/bash
+
+for domain in "$@"
+do
+    CERT=`echo | openssl s_client -connect $domain:443 2> /dev/null | sed -ne '/-BEGIN CERTIFICATE-/    ,/-END CERTIFICATE-/p'`      
+    DATE=`echo "$CERT" | openssl x509 -enddate -noout 2> /dev/null | cut -d= -f 2`
+    EXP_DATE=`date --date="$DATE" --iso-8601`
+
+    if [ -z "$DATE" ]; then
+        EXP_DATE="NO CERTIFICATE"
+    fi
+    printf "%-20s%s\n" "$EXP_DATE" "$domain"
+done
